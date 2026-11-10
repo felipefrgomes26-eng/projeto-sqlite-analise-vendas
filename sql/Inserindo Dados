@@ -1,0 +1,42 @@
+
+INSERT INTO categorias VALUES
+(1, 'Eletrônicos', 'Eletrônicos e acessórios'),
+(2, 'Informática', 'Computadores e periféricos'),
+(3, 'Casa e Cozinha', 'Produtos para casa'),
+(4, 'Esporte e Lazer', 'Artigos esportivos'),
+(5, 'Papelaria', 'Materiais de escritório'),
+(6, 'Bebidas', 'Bebidas não alcoólicas');
+
+INSERT INTO fornecedores VALUES
+(1, 'TechNova', 'São Paulo', 'SP'),
+(2, 'CasaPrática', 'Curitiba', 'PR'),
+(3, 'MundoAtivo', 'Belo Horizonte', 'MG'),
+(4, 'PapelMais', 'Rio de Janeiro', 'RJ'),
+(5, 'ByteSul', 'Porto Alegre', 'RS'),
+(6, 'SaborNatural', 'Goiânia', 'GO');
+
+INSERT INTO produtos VALUES
+(1, 'Fone Bluetooth', 1, 1, 189.90, 45),
+(2, 'Caixa de Som', 1, 1, 249.90, 30),
+(3, 'Carregador USB-C', 1, 1, 69.90, 100),
+(4, 'Webcam HD', 2, 5, 159.90, 40),
+(5, 'Teclado Mecânico', 2, 5, 329.90, 25),
+(6, 'Mouse sem Fio', 2, 5, 89.90, 70),
+(7, 'Monitor 24 polegadas', 2, 1, 899.90, 18),
+(8, 'Suporte para Notebook', 2, 5, 119.90, 35),
+(9, 'Garrafa Térmica', 3, 2, 79.90, 60),
+(10, 'Cafeteira Elétrica', 3, 2, 219.90, 22),
+(11, 'Jogo de Panelas', 3, 2, 399.90, 15),
+(12, 'Liquidificador', 3, 2, 179.90, 28),
+(13, 'Tapete de Yoga', 4, 3, 99.90, 40),
+(14, 'Halteres 5 kg', 4, 3, 139.90, 32),
+(15, 'Mochila Esportiva', 4, 3, 159.90, 38),
+(16, 'Corda de Pular', 4, 3, 39.90, 75),
+(17, 'Caderno 10 Matérias', 5, 4, 34.90, 120),
+(18, 'Kit Canetas', 5, 4, 19.90, 150),
+(19, 'Agenda', 5, 4, 29.90, 80),
+(20, 'Papel A4 500 folhas', 5, 4, 32.90, 100),
+(21, 'Suco de Uva 1L', 6, 6, 12.90, 90),
+(22, 'Água de Coco 1L', 6, 6, 9.90, 110),
+(23, 'Chá Gelado 1L', 6, 6, 8.50, 95),
+(24, 'Suco de Laranja 1L', 6, 6, 11.50, 85);
