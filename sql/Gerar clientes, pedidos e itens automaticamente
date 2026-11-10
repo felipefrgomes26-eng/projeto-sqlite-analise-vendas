@@ -1,0 +1,108 @@
+
+-- Gerar 150 clientes
+WITH RECURSIVE seq(n) AS (
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 150
+)
+INSERT INTO clientes
+    (id_cliente, nome_cliente, email, data_cadastro, cidade, estado)
+SELECT
+    n,
+    printf('Cliente %03d', n),
+    printf('cliente%03d@example.com', n),
+    date('2022-01-01', '+' || (n * 7 % 1400) || ' days'),
+    CASE n % 5
+        WHEN 0 THEN 'Rio de Janeiro'
+        WHEN 1 THEN 'São Paulo'
+        WHEN 2 THEN 'Curitiba'
+        WHEN 3 THEN 'Belo Horizonte'
+        ELSE 'Salvador'
+    END,
+    CASE n % 5
+        WHEN 0 THEN 'RJ'
+        WHEN 1 THEN 'SP'
+        WHEN 2 THEN 'PR'
+        WHEN 3 THEN 'MG'
+        ELSE 'BA'
+    END
+FROM seq;
+
+-- Gerar 1.000 pedidos
+WITH RECURSIVE seq(n) AS (
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 1000
+)
+INSERT INTO pedidos
+    (id_pedido, id_cliente, data_pedido, status_pedido)
+SELECT
+    n,
+    ((n * 37) % 150) + 1,
+    date('2023-01-01', '+' || (n * 11 % 1095) || ' days'),
+    CASE n % 10
+        WHEN 0 THEN 'Cancelado'
+        WHEN 1 THEN 'Processando'
+        WHEN 2 THEN 'Enviado'
+        ELSE 'Concluído'
+    END
+FROM seq;
+
+-- Gerar de 1 a 5 itens por pedido
+WITH RECURSIVE itens(id_pedido, numero_item, limite) AS (
+    SELECT id_pedido, 1, 1 + (id_pedido % 5)
+    FROM pedidos
+
+    UNION ALL
+
+    SELECT id_pedido, numero_item + 1, limite
+    FROM itens
+    WHERE numero_item < limite
+)
+INSERT INTO itens_pedido
+    (id_item, id_pedido, id_produto,
+     quantidade, preco_unitario, desconto)
+SELECT
+    i.id_pedido * 10 + i.numero_item,
+    i.id_pedido,
+    ((i.id_pedido * 7 + i.numero_item * 3) % 24) + 1,
+    ((i.id_pedido + i.numero_item) % 4) + 1,
+    p.preco_atual,
+    CASE
+        WHEN (i.id_pedido + i.numero_item) % 10 = 0
+            THEN 0.10
+        WHEN (i.id_pedido + i.numero_item) % 7 = 0
+            THEN 0.05
+        ELSE 0
+    END
+FROM itens i
+JOIN produtos p
+    ON p.id_produto =
+       ((i.id_pedido * 7 + i.numero_item * 3) % 24) + 1;
+
+-- Gerar pagamentos para pedidos não cancelados
+INSERT INTO pagamentos
+    (id_pagamento, id_pedido, metodo_pagamento,
+     valor_pago, status_pagamento, data_pagamento)
+SELECT
+    p.id_pedido,
+    p.id_pedido,
+    CASE p.id_pedido % 4
+        WHEN 0 THEN 'Pix'
+        WHEN 1 THEN 'Cartão de crédito'
+        WHEN 2 THEN 'Boleto'
+        ELSE 'Cartão de débito'
+    END,
+    ROUND(SUM(
+        i.quantidade * i.preco_unitario * (1 - i.desconto)
+    ), 2),
+    CASE
+        WHEN p.status_pedido IN ('Concluído', 'Enviado')
+            THEN 'Aprovado'
+        ELSE 'Pendente'
+    END,
+    p.data_pedido
+FROM pedidos p
+JOIN itens_pedido i ON i.id_pedido = p.id_pedido
+WHERE p.status_pedido <> 'Cancelado'
+GROUP BY p.id_pedido, p.status_pedido, p.data_pedido;
