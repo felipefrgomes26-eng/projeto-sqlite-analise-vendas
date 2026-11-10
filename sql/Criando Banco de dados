@@ -1,0 +1,105 @@
+
+PRAGMA foreign_keys = ON;
+
+-- Excluir as tabelas caso queira reiniciar o projeto
+DROP TABLE IF EXISTS pagamentos;
+DROP TABLE IF EXISTS itens_pedido;
+DROP TABLE IF EXISTS pedidos;
+DROP TABLE IF EXISTS produtos;
+DROP TABLE IF EXISTS fornecedores;
+DROP TABLE IF EXISTS categorias;
+DROP TABLE IF EXISTS clientes;
+
+-- 1. Clientes
+CREATE TABLE clientes (
+    id_cliente INTEGER PRIMARY KEY,
+    nome_cliente TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    data_cadastro TEXT NOT NULL,
+    cidade TEXT,
+    estado TEXT
+);
+
+-- 2. Categorias
+CREATE TABLE categorias (
+    id_categoria INTEGER PRIMARY KEY,
+    nome_categoria TEXT NOT NULL UNIQUE,
+    descricao TEXT
+);
+
+-- 3. Fornecedores
+CREATE TABLE fornecedores (
+    id_fornecedor INTEGER PRIMARY KEY,
+    nome_fornecedor TEXT NOT NULL UNIQUE,
+    cidade TEXT,
+    estado TEXT
+);
+
+-- 4. Produtos
+CREATE TABLE produtos (
+    id_produto INTEGER PRIMARY KEY,
+    nome_produto TEXT NOT NULL,
+    id_categoria INTEGER NOT NULL,
+    id_fornecedor INTEGER NOT NULL,
+    preco_atual REAL NOT NULL CHECK (preco_atual >= 0),
+    estoque INTEGER NOT NULL DEFAULT 0 CHECK (estoque >= 0),
+    FOREIGN KEY (id_categoria)
+        REFERENCES categorias(id_categoria),
+    FOREIGN KEY (id_fornecedor)
+        REFERENCES fornecedores(id_fornecedor)
+);
+
+-- 5. Pedidos
+CREATE TABLE pedidos (
+    id_pedido INTEGER PRIMARY KEY,
+    id_cliente INTEGER NOT NULL,
+    data_pedido TEXT NOT NULL,
+    status_pedido TEXT NOT NULL
+        CHECK (status_pedido IN (
+            'Processando', 'Enviado',
+            'Concluído', 'Cancelado'
+        )),
+    FOREIGN KEY (id_cliente)
+        REFERENCES clientes(id_cliente)
+);
+
+-- 6. Itens dos pedidos
+CREATE TABLE itens_pedido (
+    id_item INTEGER PRIMARY KEY,
+    id_pedido INTEGER NOT NULL,
+    id_produto INTEGER NOT NULL,
+    quantidade INTEGER NOT NULL CHECK (quantidade > 0),
+    preco_unitario REAL NOT NULL CHECK (preco_unitario >= 0),
+    desconto REAL NOT NULL DEFAULT 0
+        CHECK (desconto >= 0 AND desconto <= 1),
+    FOREIGN KEY (id_pedido)
+        REFERENCES pedidos(id_pedido) ON DELETE CASCADE,
+    FOREIGN KEY (id_produto)
+        REFERENCES produtos(id_produto)
+);
+
+-- 7. Pagamentos
+CREATE TABLE pagamentos (
+    id_pagamento INTEGER PRIMARY KEY,
+    id_pedido INTEGER NOT NULL UNIQUE,
+    metodo_pagamento TEXT NOT NULL,
+    valor_pago REAL NOT NULL CHECK (valor_pago >= 0),
+    status_pagamento TEXT NOT NULL
+        CHECK (status_pagamento IN ('Pendente', 'Aprovado')),
+    data_pagamento TEXT NOT NULL,
+    FOREIGN KEY (id_pedido)
+        REFERENCES pedidos(id_pedido) ON DELETE CASCADE
+);
+
+-- Índices para ajudar nas consultas
+CREATE INDEX idx_pedidos_cliente
+    ON pedidos(id_cliente);
+
+CREATE INDEX idx_pedidos_data
+    ON pedidos(data_pedido);
+
+CREATE INDEX idx_itens_pedido
+    ON itens_pedido(id_pedido);
+
+CREATE INDEX idx_itens_produto
+    ON itens_pedido(id_produto);
